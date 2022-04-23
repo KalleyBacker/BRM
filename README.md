@@ -24,21 +24,23 @@ BRM, es una herramienta hecha con el fin de realizar copias de seguridad que fac
 ### Guia de instalacion!
 
 ```shell
-cd ~ || cd $HOME && git clone git@gitlab.com:linux-raid/project-backup-raid_2.0.git && ls -1 | egrep ".sh$|.service$" |xargs -i chmod 755 {} && ./envBRM.sh && echo -e "\nTERMINADO\n" 
+cd ~ || cd $HOME && git clone git@github.com:KalleyBacker/BRM.git && ls -1 | egrep ".sh$|.service$" |xargs -i chmod 755 {} && ./envBRM.sh && echo -e "\nTERMINADO\n" 
 ```
 
 O
 
 ```shell
 cd ~ 
-git clone git@gitlab.com:linux-raid/project-backup-raid_2.0.git
+git clone git@github.com:KalleyBacker/BRM.git
 chmod 755 *.sh *.service 
 ./envBRM.sh 
 bash envBRM.sh 
 ```
 
 
-# Conctato
+# social 
 www.linkedin.com/in/juan-carlos-morla-reyes-6410a91b3
+https://github.com/KalleyBacker
 
-www.gitlab.com/juancarlosmorlareyes
+
+
