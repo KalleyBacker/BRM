@@ -1,0 +1,201 @@
+#!/bin/env bash 
+ 
+#@author Juan Carlos Morla Reyes
+#@red social linkedin www.linkedin.com/in/juan-carlos-morla-reyes-6410a91b3
+#@description servicio manager de RAID BACKUP MORLA  
+
+logRAIDBACKUP=/var/log/RAID-BACKUP
+HOME2=/home/jcarlos/BRM
+NAME="BRM.service"
+DESC="BRM.service"
+ruta_conf=/etc/RAID-BACKUP/BRM.conf
+DATE1=$(date +%u)  
+DATE=$(date +%d-%m-%Y-%I-%M-%S)
+#lsusd=/etc/RAID-BACKUP/lsusb.tpr
+
+
+HRCONF=$(cat $ruta_conf| grep HR| sed "s:['',HR,=]::g")
+
+
+VAR_BRM_CONF_BF(){
+
+
+	BF=$(cat $ruta_conf |\
+		grep -i "BF"|\
+			sed "s/[BD]//g;s/[,]/\n/g;s/[=,'']//g")
+
+	echo $BF | grep -o $DATE1|wc -l  		 
+}
+
+
+VAR_BRM_CONF_BI(){
+
+
+	BI=$(cat $ruta_conf |\
+		grep -i "BI"|\
+			sed "s/[BI]//g;s/[,]/\n/g;s/[=,'']//g")
+
+	echo $BI | grep -o $DATE1|wc -l 		 
+
+} 
+
+
+RAID=$(cat $ruta_conf|\
+	grep RAID_DEFAULT|\
+		cut -d"=" -f 2|\
+			xargs -i grep ^"{}" $ruta_conf| cut -c 4-)	
+if [[ -z $RAID ]];then exit 1 ;fi
+
+
+
+RAID_MOUNT(){
+#	para la version 2.0 :D
+######################################################################################
+#	lsusb| awk '{ print $6 }' 1> $lsusd
+	
+#	for ID in 1 2 3 4 
+#	do
+
+#		IDS[$ID]=$(cat $ruta_conf|\
+#			egrep "ID$ID"|cut -c 5-) && echo "${IDS[$ID]}"| xargs -i grep {} $lsusd
+
+#	#done
+######################################################################################
+
+
+	MOUNT=$(df | grep $RAID |wc -l)
+
+	[[ $MOUNT = 1 ]] ||\
+	CONTAD=0
+
+	for A in 1 2 3  ;do
+	
+		while [[ $CONTAD -lt 3 ]]; do
+		
+			if [[ $MOUNT = 1 ]]; then  
+			
+				CONTAD=3
+ 
+			else 
+		
+				xmessage -timeout 15 "RAID NO MONTADA!! $DATE" 
+				CONF=0
+				CONTAD=$(( $CONTAD + 1 ))
+				mount -va && sleep 1
+				MOUNT=$(df | grep $RAID |wc -l) 
+
+			fi
+
+		done	
+	
+	done 
+}
+		
+
+CICLOsTECR=$(cat $ruta_conf|\
+	grep CICLOsTECR|\
+		cut -d"=" -f 2)
+		
+		#CICLOS_Tiempo_de_espera_comprobacion_raid_MODIFICADO
+let CICLOsTECRM=$CICLOsTECR-1	
+let CICLOsTECRM1=$CICLOsTECRM-1		
+
+#echo $CICLOsTECRM $CICLOsTECRM1 $CICLOsTECR
+COMP_bf_bi(){
+
+	VAR_BRM_CONF_BI1=$(VAR_BRM_CONF_BI)
+	VAR_BRM_CONF_BF1=$(VAR_BRM_CONF_BF)	
+
+
+	while [[ $CICLOsTECRM -ge $CONF ]]
+	do 
+		sleep 5
+		HRPC=$(date "+%H-%M")
+		
+					 
+		if [[ $VAR_BRM_CONF_BI1 = 1 ]]; then
+			
+			if [[ $HRPC = $HRCONF ]]; then
+					
+				RAID_MOUNT && bash $HOME2/BI.sh &>> $logRAIDBACKUP/INCREMENTALBackupRAID.Dlog/INCREMENTALBackupRAID_$DATE.log && sleep 120s || echo 'fatal error failed to start backup script(auto-reload-now)' 
+			
+			fi
+		fi	
+		
+		
+		if [[ $VAR_BRM_CONF_BF1 = 1 ]]; then
+			
+			if [[ $HRPC = $HRCONF ]]; then
+				
+				RAID_MOUNT && bash $HOME2/BF.sh &>> $logRAIDBACKUP/FullBackupRAID.Dlog/FullBackupRAID_$DATE.log && sleep 120s || echo 'fatal error failed to start backup script(auto-reload-now)'
+			
+			fi 	
+		
+		fi
+
+		if [[ $CICLOsTECRM1 = $CONF ]]; then
+		 
+			RAID_MOUNT
+			CONF=0
+
+		fi
+
+		CONF="$(( $CONF + 1 ))" 	
+		
+	done 
+
+			#contador sigue corrido y no avisa que esta desmontada usb
+	##problema que se tiene que arreglar cuando se desconecta bruscamente el usb se quede montada 
+	#solucion agregar lsusb para ver si existe entonces esta
+	#si no existe desmonta y comprueba si el dispositivo esta en lsusb si esta lo monta
+	#si no esta en lsusb y en df si pues desmonta el proceso colgado y compara
+	# ps agregue mount -av como parche temporal...
+}
+
+stop_opcion(){
+
+	ps axu | grep "BRM.service" | awk '{ print $2}' | xargs -i kill -9 {} 
+
+	status=$(ps axu |egrep "BI|BF"| wc -l)
+	
+#	if [[ $status = 1 ]];then 
+
+#		echo 'backup se esta realizando no se puede interrumpir'
+#		echo $status  
+		
+
+#		while  [[ $saldefosr -lt 3 ]];do
+		
+#			 status1=$(ps axu |egrep -o "BI.sh|BF.sh"| wc -l ) 
+			 
+#			 if [[ $status = 1 ]];then
+			 	
+#			 	saldefor=5 
+#			 fi 
+#
+#		done	 
+#	fi	
+	exit 
+}
+
+
+
+case "$1" in
+
+    start)
+     	COMP_bf_bi
+     	;;
+
+    stop) 
+		stop_opcion
+		;;
+
+    restart|force-reload)
+   		echo "NO configuration" 
+   		;;
+    *)
+        N=/etc/init.d/$NAME
+        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+      	 exit 0
+        ;;
+esac

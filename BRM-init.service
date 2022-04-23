@@ -1,0 +1,26 @@
+#!/bin/bash 
+#@author juan carlos Morla reyes
+#linkedin www.linkedin.com/in/juan-carlos-morla-reyes-6410a91b3
+
+N=/etc/init.d/BRN-init.service
+rt=/home/jcarlos/BRM/BRM.service
+pmt=$1
+
+exc(){
+	nohup $rt $pmt &>/dev/null &
+	exit
+}
+
+case $pmt in
+	start)
+		exc
+		;;
+	stop)
+		exc	
+		;;
+	*)
+     echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	 exit 1
+	;;	
+esac
+	
