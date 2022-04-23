@@ -2,7 +2,7 @@
 
 ### Que es de BRM:
 
-BRM, es una herramienta hecha con el fin de realizar copias de seguridad que facilita la programación y ejecución de nuestros Backups de forma activa. 
+BRM, es una herramienta hecha con el fin de realizar copias de seguridad 
 
 ### descripción de servicios y scripts
 
