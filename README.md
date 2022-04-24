@@ -35,9 +35,9 @@ O
 ```shell
 cd ~ 
 git clone git@github.com:KalleyBacker/BRM.git
+cd BRM
 chmod 755 *.sh *.service 
-./envBRM.sh 
-bash envBRM.sh 
+./envBRM.sh o bash envBRM.sh 
 ```
 
 
